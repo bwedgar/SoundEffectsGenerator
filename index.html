@@ -1,0 +1,104 @@
+//index.html
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="apple-touch-icon" href="launch.png">
+  <link rel="apple-touch-startup-image" href="launch.png">
+  <meta name="apple-mobile-web-app-title" content="Push To Telescope">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <style>
+    body {
+      background-color: black;
+      color: red;
+      font-family: verdana;
+      font-size: 120%;
+    }
+
+    .button {
+      background-color: black;
+      color: red;
+      font-family: verdana;
+      font-size: 7vw;
+      border: 1px solid red;
+      padding: 2% 2%;
+      text-align: left;
+    }
+  </style>
+
+  <script>
+    function ready() {
+      //console.log("ready")
+      document.getElementById("play").addEventListener("click", () => {
+        play();
+      });
+
+      if ('webkitAudioContext' in window)
+        audioCtx = new webkitAudioContext()
+      else
+        audioCtx = new AudioContext()
+      oscillator = audioCtx.createOscillator()
+      oscillator.frequency.value = 19000
+      oscillatorR = audioCtx.createOscillator()
+      oscillatorR.frequency.value = 19000
+      if ('webkitAudioContext' in window) {
+        gainNode = audioCtx.createGainNode()
+        gainNodeR = audioCtx.createGainNode()
+      } else {
+        gainNode = audioCtx.createGain()
+        gainNodeR = audioCtx.createGain()
+      }
+      if ('webkitAudioContext' in window) {
+        oscillator.noteOn(0)
+        oscillatorR.noteOn(0)
+      } else {
+        t = audioCtx.currentTime
+        oscillator.start(t)
+        oscillatorR.start(t + 0.00002632)
+        oscillator.connect(gainNode)
+        oscillatorR.connect(gainNodeR)
+        merger = audioCtx.createChannelMerger(2)
+        gainNode.connect(merger, 0, 0)
+        gainNodeR.connect(merger, 0, 1)
+        merger.connect(audioCtx.destination)
+        t = audioCtx.currentTime
+      }
+    }
+    }
+
+    play = () => {
+      t = 0;
+      gainNode.gain.setValueAtTime(1.0, t)
+      gainNodeR.gain.setValueAtTime(1.0, t)
+      t += pulseTime
+      gainNode.gain.setValueAtTime(0.0, t)
+      gainNodeR.gain.setValueAtTime(0.0, t)
+      //console.log("PLAY");
+
+      t = audioCtx.currentTime
+
+    }
+    }
+    if (document.readyState == 'loading') {
+      document.addEventListener('DOMContentLoaded', ready);
+    } else {
+      ready();
+    }
+  </script>
+
+</head>
+
+<body>
+
+  <button id="play" class="button">play</button>
+
+
+</body>
+
+</html>
