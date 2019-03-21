@@ -34,12 +34,33 @@
   <script>
     function ready() {
 
+
+
       let playing = false;
+      let frequency = 440;
       //console.log("ready")
 
       document.getElementById("play").addEventListener("click", () => {
         play();
       });
+      document.getElementById("sliderFrequency").addEventListener("click", () => {
+        frequency = sliderFrequency.value;
+        oscillator.frequency.value = frequency
+        console.log(frequency)
+      });
+      document.getElementById("buttonWaveformSine").addEventListener("click", () => {
+        oscillator.type = "sine"
+      });
+      document.getElementById("buttonWaveformSquare").addEventListener("click", () => {
+        oscillator.type = "square"
+      });
+      document.getElementById("buttonWaveformSawtooth").addEventListener("click", () => {
+        oscillator.type = "sawtooth"
+      });
+      document.getElementById("buttonWaveformTriangle").addEventListener("click", () => {
+        oscillator.type = "triangle"
+      });
+
 
       if ('webkitAudioContext' in window)
         audioCtx = new webkitAudioContext()
@@ -75,22 +96,39 @@
         t = audioCtx.currentTime
       }
 
+      var bufferSize = 2 * audioCtx.sampleRate,
+    noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
+    output = noiseBuffer.getChannelData(0);
+for (var i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+}
 
+var whiteNoise = audioCtx.createBufferSource();
+whiteNoise.buffer = noiseBuffer;
+whiteNoise.loop = true;
+whiteNoise.start(0);
+  gainNode1 = audioCtx.createGain()
+whiteNoise.connect(gainNode1)
+
+gainNode1.connect(audioCtx.destination);
 
 
       play = () => {
-        if (playing==true) {
+        if (playing == true) {
           playing = false;
-          t=0;
-          gainNode.gain.setValueAtTime(0, t)//turn gain down
+          t = 0;
+          gainNode.gain.setValueAtTime(0, t) //turn gain down
           gainNodeR.gain.setValueAtTime(0, t)
+          gainNode1.gain.setValueAtTime(0, t)
           console.log("playing")
         } else {
           playing = true;
           console.log("NOT playing")
+            t = 0;
+            gainNode1.gain.setValueAtTime(1, t)
 
 
-          t = 0;
+
           gainNode.gain.setValueAtTime(1.0, t)
           gainNodeR.gain.setValueAtTime(1.0, t)
         }
@@ -101,6 +139,8 @@
       }
 
       play();
+
+
 
     }
 
@@ -116,8 +156,14 @@
 
 <body>
 
-  <button id="play" class="button">play</button>
+  <input type="radio" name="waveforms" id="buttonWaveformSine" value="sine"> sine
+  <input type="radio" name="waveforms" id="buttonWaveformSquare" value="square"> sawtooth
+  <input type="radio" name="waveforms" id="buttonWaveformSawtooth" value="sawtooth"> square
+  <input type="radio" name="waveforms" id="buttonWaveformTriangle" value="triangle"> triangular<br>
 
+
+  <input type="range" min="10" max="1000" value="50" class="slider" id="sliderFrequency"><br>
+  <button id="play" class="button">play</button>
 
 </body>
 
