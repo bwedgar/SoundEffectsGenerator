@@ -34,7 +34,10 @@
   <script>
     function ready() {
 
-
+      var arrayRandom = []
+      for (i = 0; i++; i < 1000) {
+        arrayRandom[i] = (Math.random() + 0.5) * 2 / 3
+      }
 
       let playing = false;
       let frequency = 440;
@@ -97,21 +100,28 @@
       }
 
       var bufferSize = 2 * audioCtx.sampleRate,
-    noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
-    output = noiseBuffer.getChannelData(0);
-for (var i = 0; i < bufferSize; i++) {
-    output[i] = Math.random() * 2 - 1;
-}
+        noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
+        output = noiseBuffer.getChannelData(0);
+      for (var i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
 
-var whiteNoise = audioCtx.createBufferSource();
-whiteNoise.buffer = noiseBuffer;
-whiteNoise.loop = true;
-whiteNoise.start(0);
-  gainNode1 = audioCtx.createGain()
-whiteNoise.connect(gainNode1)
+      var whiteNoise = audioCtx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
+      whiteNoise.start(0);
+      gainNode1 = audioCtx.createGain()
+      whiteNoise.connect(gainNode1)
 
-gainNode1.connect(audioCtx.destination);
+      gainNode1.connect(audioCtx.destination);
 
+      timerGain = () => {
+        set timeout(() => {
+          gainNode.gain.setValueAtTime(arrayRandom[iGainArray];
+            timerGain();
+          }, 100));
+      }
+      timerGain();
 
       play = () => {
         if (playing == true) {
@@ -124,10 +134,8 @@ gainNode1.connect(audioCtx.destination);
         } else {
           playing = true;
           console.log("NOT playing")
-            t = 0;
-            gainNode1.gain.setValueAtTime(1, t)
-
-
+          t = 0;
+          gainNode1.gain.setValueAtTime(1, t)
 
           gainNode.gain.setValueAtTime(1.0, t)
           gainNodeR.gain.setValueAtTime(1.0, t)
@@ -140,10 +148,7 @@ gainNode1.connect(audioCtx.destination);
 
       play();
 
-
-
     }
-
 
     if (document.readyState == 'loading') {
       document.addEventListener('DOMContentLoaded', ready);
