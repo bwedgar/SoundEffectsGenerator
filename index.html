@@ -1,4 +1,3 @@
-//index.html
 <!DOCTYPE html>
 
 <html>
@@ -34,7 +33,10 @@
 
   <script>
     function ready() {
+
+      let playing = false;
       //console.log("ready")
+
       document.getElementById("play").addEventListener("click", () => {
         play();
       });
@@ -43,10 +45,12 @@
         audioCtx = new webkitAudioContext()
       else
         audioCtx = new AudioContext()
+
       oscillator = audioCtx.createOscillator()
-      oscillator.frequency.value = 19000
+      oscillator.frequency.value = 440
       oscillatorR = audioCtx.createOscillator()
-      oscillatorR.frequency.value = 19000
+      oscillatorR.frequency.value = 660
+
       if ('webkitAudioContext' in window) {
         gainNode = audioCtx.createGainNode()
         gainNodeR = audioCtx.createGainNode()
@@ -54,6 +58,7 @@
         gainNode = audioCtx.createGain()
         gainNodeR = audioCtx.createGain()
       }
+
       if ('webkitAudioContext' in window) {
         oscillator.noteOn(0)
         oscillatorR.noteOn(0)
@@ -69,22 +74,37 @@
         merger.connect(audioCtx.destination)
         t = audioCtx.currentTime
       }
-    }
+
+
+
+
+      play = () => {
+        if (playing==true) {
+          playing = false;
+          t=0;
+          gainNode.gain.setValueAtTime(0, t)//turn gain down
+          gainNodeR.gain.setValueAtTime(0, t)
+          console.log("playing")
+        } else {
+          playing = true;
+          console.log("NOT playing")
+
+
+          t = 0;
+          gainNode.gain.setValueAtTime(1.0, t)
+          gainNodeR.gain.setValueAtTime(1.0, t)
+        }
+
+        //console.log("PLAY");
+
+        t = audioCtx.currentTime
+      }
+
+      play();
+
     }
 
-    play = () => {
-      t = 0;
-      gainNode.gain.setValueAtTime(1.0, t)
-      gainNodeR.gain.setValueAtTime(1.0, t)
-      t += pulseTime
-      gainNode.gain.setValueAtTime(0.0, t)
-      gainNodeR.gain.setValueAtTime(0.0, t)
-      //console.log("PLAY");
 
-      t = audioCtx.currentTime
-
-    }
-    }
     if (document.readyState == 'loading') {
       document.addEventListener('DOMContentLoaded', ready);
     } else {
