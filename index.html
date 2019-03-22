@@ -35,12 +35,14 @@
     function ready() {
 
       var arrayRandom = []
-      for (i = 0; i++; i < 1000) {
-        arrayRandom[i] = (Math.random() + 0.5) * 2 / 3
+      for (i = 0; i < 100; i++) {
+        arrayRandom[i] = (Math.random() + 0.5) * 2 / 3;
+        //console.log(arrayRandom)
       }
 
       let playing = false;
       let frequency = 440;
+      let speed = 1000;
       //console.log("ready")
 
       document.getElementById("play").addEventListener("click", () => {
@@ -64,16 +66,37 @@
         oscillator.type = "triangle"
       });
 
+      document.getElementById("speed").addEventListener("click", () => {
+        speed = 3500 - document.getElementById("speed").value;
+        console.log(speed)
+      });
+
+      document.getElementById("steamEngine").addEventListener("click", () => {
+        steamEngine(speed);
+      });
+
+      document.getElementById("rain").addEventListener("click", () => {
+        rain();
+      });
+
+      document.getElementById("waves").addEventListener("click", () => {
+        waves();
+      });
+
+      document.getElementById("seagull").addEventListener("click", () => {
+        seagull();
+      });
 
       if ('webkitAudioContext' in window)
         audioCtx = new webkitAudioContext()
       else
         audioCtx = new AudioContext()
 
+      t = audioCtx.currentTime;
       oscillator = audioCtx.createOscillator()
-      oscillator.frequency.value = 440
+      oscillator.frequency.value = 0; //440
       oscillatorR = audioCtx.createOscillator()
-      oscillatorR.frequency.value = 660
+      oscillatorR.frequency.value = 0; //660
 
       if ('webkitAudioContext' in window) {
         gainNode = audioCtx.createGainNode()
@@ -110,18 +133,112 @@
       whiteNoise.buffer = noiseBuffer;
       whiteNoise.loop = true;
       whiteNoise.start(0);
+
       gainNode1 = audioCtx.createGain()
+      gainNode2 = audioCtx.createGain()
+      gainNode3 = audioCtx.createGain()
+
       whiteNoise.connect(gainNode1)
+      whiteNoise.connect(gainNode2) //steamEngine
+      whiteNoise.connect(gainNode3)
 
-      gainNode1.connect(audioCtx.destination);
-
-      timerGain = () => {
-        set timeout(() => {
-          gainNode.gain.setValueAtTime(arrayRandom[iGainArray];
+      rain = () => {
+        gainNode1.gain.setValueAtTime(0, t);
+        gainNode1.connect(audioCtx.destination);
+        iGainArray = 0;
+        rampRain = 0.1;
+        timerGain = () => {
+          //console.log("timerGain")
+          setTimeout(() => {
+            gainNode1.gain.setValueAtTime(arrayRandom[iGainArray] * rampRain, t);
+            iGainArray++;
+            if (iGainArray == 99) {
+              iGainArray = 0;
+              rampRain += 0.02;
+            }
             timerGain();
-          }, 100));
+          }, 10);
+        }
+        timerGain();
       }
-      timerGain();
+
+      waves = () => {
+        gainNode3.gain.setValueAtTime(0, t);
+        gainNode3.connect(audioCtx.destination);
+        rampWave = 0.1;
+        var timeBackwash = 3000 * Math.random() + 3000
+
+        waveStart = () => {
+          //console.log("timerGain")
+          setTimeout(() => {
+            t = audioCtx.currentTime
+            gainNode3.gain.linearRampToValueAtTime(1.0, t + 0.5);
+
+            waveStop();
+          }, 500);
+        }
+
+        waveStop = () => {
+          //console.log("timerGain")
+          setTimeout(() => {
+            t = audioCtx.currentTime
+            var timeBackwash = 3000 * Math.random() + 3000
+            gainNode3.gain.linearRampToValueAtTime(0.1, t + 2);
+
+            waveStart();
+          }, timeBackwash);
+        }
+
+
+        waveStart();
+      }
+
+      steamEngine = () => {
+        gainNode2.connect(audioCtx.destination);
+        iGainArray = 0;
+        timerGain2 = () => {
+          console.log("timerGain")
+          setTimeout(() => {
+            t = audioCtx.currentTime;
+            gainNode2.gain.setValueAtTime(1, t);
+            gainNode2.gain.setValueAtTime(0, t + 0.1); // 100 ms chuff
+            timerGain2();
+          }, speed);
+        }
+        timerGain2();
+      }
+
+      seagull = () => {
+        console.log("seagull")
+        oscillatorSeaGullCarrier = audioCtx.createOscillator()
+        oscillatorSeaGullCarrier.frequency.value = 1200;
+          oscillatorSeaGullCarrier.type = "sawtooth";
+        gainNodeSeaGullCarrier = audioCtx.createGain()
+        oscillatorSeaGullCarrier.connect(gainNodeSeaGullCarrier)
+        gainNodeSeaGullCarrier.gain.value = 100;
+        gainNodeSeaGullCarrier.connect(audioCtx.destination);
+
+        oscillatorSeaGullModulator = audioCtx.createOscillator()
+        oscillatorSeaGullModulator.frequency.value = 20;
+                oscillatorSeaGullModulator.type = "square";
+        gainNodeSeaGullModulator = audioCtx.createGain()
+        oscillatorSeaGullModulator.connect(gainNodeSeaGullModulator)
+        gainNodeSeaGullModulator.gain.value = 100;
+        gainNodeSeaGullModulator.connect(oscillatorSeaGullCarrier.frequency);
+        oscillatorSeaGullCarrier.start(0)
+                t = audioCtx.currentTime
+        oscillatorSeaGullCarrier.frequency.value = linearRampToValueAtTime(200, t + 2);//1200;
+
+        //oscillatorSeaGullModulator.start(0)
+        //squawk = () => {
+          setTimeout(() => {
+      oscillatorSeaGullCarrier.stop(0)
+          }, 1000)
+        //}
+      //  squawk();
+      }
+
+
 
       play = () => {
         if (playing == true) {
@@ -146,7 +263,7 @@
         t = audioCtx.currentTime
       }
 
-      play();
+      // play();
 
     }
 
@@ -166,10 +283,19 @@
   <input type="radio" name="waveforms" id="buttonWaveformSawtooth" value="sawtooth"> square
   <input type="radio" name="waveforms" id="buttonWaveformTriangle" value="triangle"> triangular<br>
 
-
+  <br>
   <input type="range" min="10" max="1000" value="50" class="slider" id="sliderFrequency"><br>
   <button id="play" class="button">play</button>
+  <br>
+  <button id="steamEngine" class="button">steamEngine</button><br>
 
+  <input type="range" min="1000" max="3000" value="2000" class="slider" id="speed"><br>
+  <br>
+  <button id="rain" class="button">rain</button><br>
+  <br>
+  <button id="waves" class="button">waves</button><br>
+  <br>
+  <button id="seagull" class="button">seagull</button><br>
 </body>
 
 </html>
