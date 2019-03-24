@@ -34,237 +34,282 @@
   <script>
     function ready() {
 
-      var arrayRandom = []
-      for (i = 0; i < 100; i++) {
-        arrayRandom[i] = (Math.random() + 0.5) * 2 / 3;
-        //console.log(arrayRandom)
+      class Note {
+        constructor(frequencyStart, frequencyEnd, duration) {
+          this.frequencyStart = frequencyStart;
+          this.frequencyEnd = frequencyEnd;
+          this.duration = duration;
+        }
       }
 
-      let playing = false;
-      let frequency = 440;
-      let speed = 1000;
-      //console.log("ready")
+      seagull = [];
+      seagull.push(new Note(570, 1200, 200));
+      // seagull.push(new Note(0, 0, 600));
+      seagull.push(new Note(1200, 200, 400));
+      seagull.push(new Note(0, 0, 600));
+      seagull.push(new Note(1200, 400, 200));
 
-      document.getElementById("play").addEventListener("click", () => {
-        play();
-      });
-      document.getElementById("sliderFrequency").addEventListener("click", () => {
-        frequency = sliderFrequency.value;
-        oscillator.frequency.value = frequency
-        console.log(frequency)
-      });
-      document.getElementById("buttonWaveformSine").addEventListener("click", () => {
-        oscillator.type = "sine"
-      });
-      document.getElementById("buttonWaveformSquare").addEventListener("click", () => {
-        oscillator.type = "square"
-      });
-      document.getElementById("buttonWaveformSawtooth").addEventListener("click", () => {
-        oscillator.type = "sawtooth"
-      });
-      document.getElementById("buttonWaveformTriangle").addEventListener("click", () => {
-        oscillator.type = "triangle"
-      });
+      playArray = (soundArray) => {
+        // AudioContext = AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext || window.webkitAudioContext;
 
-      document.getElementById("speed").addEventListener("click", () => {
-        speed = 3500 - document.getElementById("speed").value;
-        console.log(speed)
-      });
 
-      document.getElementById("steamEngine").addEventListener("click", () => {
-        steamEngine(speed);
-      });
+        oscillator = audioCtx.createOscillator()
 
-      document.getElementById("rain").addEventListener("click", () => {
-        rain();
-      });
-
-      document.getElementById("waves").addEventListener("click", () => {
-        waves();
-      });
-
-      document.getElementById("seagull").addEventListener("click", () => {
-        seagull();
-      });
-
-      if ('webkitAudioContext' in window)
-        audioCtx = new webkitAudioContext()
-      else
-        audioCtx = new AudioContext()
-
-      t = audioCtx.currentTime;
-      oscillator = audioCtx.createOscillator()
-      oscillator.frequency.value = 0; //440
-      oscillatorR = audioCtx.createOscillator()
-      oscillatorR.frequency.value = 0; //660
-
-      if ('webkitAudioContext' in window) {
-        gainNode = audioCtx.createGainNode()
-        gainNodeR = audioCtx.createGainNode()
-      } else {
         gainNode = audioCtx.createGain()
-        gainNodeR = audioCtx.createGain()
-      }
-
-      if ('webkitAudioContext' in window) {
-        oscillator.noteOn(0)
-        oscillatorR.noteOn(0)
-      } else {
-        t = audioCtx.currentTime
-        oscillator.start(t)
-        oscillatorR.start(t + 0.00002632)
         oscillator.connect(gainNode)
-        oscillatorR.connect(gainNodeR)
-        merger = audioCtx.createChannelMerger(2)
-        gainNode.connect(merger, 0, 0)
-        gainNodeR.connect(merger, 0, 1)
-        merger.connect(audioCtx.destination)
-        t = audioCtx.currentTime
+
+        gainNode.connect(audioCtx.destination)
+
+        oscillator.start(0)
+        oscillator.type="triangle"
+        elapsedTime = 0 + audioCtx.currentTime;
+
+        for (note of soundArray) {
+          console.log(note.duration);
+
+          oscillator.frequency.setValueAtTime(note.frequencyStart, elapsedTime)
+          gainNode.gain.setValueAtTime(1, elapsedTime);
+          gainNode.gain.setValueAtTime(0, elapsedTime + note.duration / 1000);
+
+          oscillator.frequency.linearRampToValueAtTime(note.frequencyEnd, elapsedTime + note.duration / 1000);
+          elapsedTime += note.duration / 1000;
+        }
       }
 
-      var bufferSize = 2 * audioCtx.sampleRate,
-        noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
-        output = noiseBuffer.getChannelData(0);
-      for (var i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
-
-      var whiteNoise = audioCtx.createBufferSource();
-      whiteNoise.buffer = noiseBuffer;
-      whiteNoise.loop = true;
-      whiteNoise.start(0);
-
-      gainNode1 = audioCtx.createGain()
-      gainNode2 = audioCtx.createGain()
-      gainNode3 = audioCtx.createGain()
-
-      whiteNoise.connect(gainNode1)
-      whiteNoise.connect(gainNode2) //steamEngine
-      whiteNoise.connect(gainNode3)
-
-      rain = () => {
-        gainNode1.gain.setValueAtTime(0, t);
-        gainNode1.connect(audioCtx.destination);
-        iGainArray = 0;
-        rampRain = 0.1;
-        timerGain = () => {
-          //console.log("timerGain")
-          setTimeout(() => {
-            gainNode1.gain.setValueAtTime(arrayRandom[iGainArray] * rampRain, t);
-            iGainArray++;
-            if (iGainArray == 99) {
-              iGainArray = 0;
-              rampRain += 0.02;
+      playArray(seagull);
+      /*
+            var arrayRandom = []
+            for (i = 0; i < 100; i++) {
+              arrayRandom[i] = (Math.random() + 0.5) * 2 / 3;
+              //console.log(arrayRandom)
             }
-            timerGain();
-          }, 10);
-        }
-        timerGain();
-      }
 
-      waves = () => {
-        gainNode3.gain.setValueAtTime(0, t);
-        gainNode3.connect(audioCtx.destination);
-        rampWave = 0.1;
-        var timeBackwash = 3000 * Math.random() + 3000
+            let playing = false;
+            let frequency = 440;
+            let speed = 1000;
+            //console.log("ready")
 
-        waveStart = () => {
-          //console.log("timerGain")
-          setTimeout(() => {
-            t = audioCtx.currentTime
-            gainNode3.gain.linearRampToValueAtTime(1.0, t + 0.5);
+            document.getElementById("play").addEventListener("click", () => {
+              play();
+            });
+            document.getElementById("sliderFrequency").addEventListener("click", () => {
+              frequency = sliderFrequency.value;
+              oscillator.frequency.value = frequency
+              console.log(frequency)
+            });
+            document.getElementById("buttonWaveformSine").addEventListener("click", () => {
+              oscillator.type = "sine"
+            });
+            document.getElementById("buttonWaveformSquare").addEventListener("click", () => {
+              oscillator.type = "square"
+            });
+            document.getElementById("buttonWaveformSawtooth").addEventListener("click", () => {
+              oscillator.type = "sawtooth"
+            });
+            document.getElementById("buttonWaveformTriangle").addEventListener("click", () => {
+              oscillator.type = "triangle"
+            });
 
-            waveStop();
-          }, 500);
-        }
+            document.getElementById("speed").addEventListener("click", () => {
+              speed = 3500 - document.getElementById("speed").value;
+              console.log(speed)
+            });
 
-        waveStop = () => {
-          //console.log("timerGain")
-          setTimeout(() => {
-            t = audioCtx.currentTime
-            var timeBackwash = 3000 * Math.random() + 3000
-            gainNode3.gain.linearRampToValueAtTime(0.1, t + 2);
+            document.getElementById("steamEngine").addEventListener("click", () => {
+              steamEngine(speed);
+            });
 
-            waveStart();
-          }, timeBackwash);
-        }
+            document.getElementById("rain").addEventListener("click", () => {
+              rain();
+            });
 
+            document.getElementById("waves").addEventListener("click", () => {
+              waves();
+            });
 
-        waveStart();
-      }
+            document.getElementById("seagull").addEventListener("click", () => {
+              seagull();
+            });
 
-      steamEngine = () => {
-        gainNode2.connect(audioCtx.destination);
-        iGainArray = 0;
-        timerGain2 = () => {
-          console.log("timerGain")
-          setTimeout(() => {
+            if ('webkitAudioContext' in window)
+              audioCtx = new webkitAudioContext()
+            else
+              audioCtx = new AudioContext()
+
             t = audioCtx.currentTime;
-            gainNode2.gain.setValueAtTime(1, t);
-            gainNode2.gain.setValueAtTime(0, t + 0.1); // 100 ms chuff
-            timerGain2();
-          }, speed);
-        }
-        timerGain2();
-      }
+            oscillator = audioCtx.createOscillator()
+            oscillator.frequency.value = 0; //440
+            oscillatorR = audioCtx.createOscillator()
+            oscillatorR.frequency.value = 0; //660
 
-      seagull = () => {
-        console.log("seagull")
-        oscillatorSeaGullCarrier = audioCtx.createOscillator()
-        oscillatorSeaGullCarrier.frequency.value = 1200;
-          oscillatorSeaGullCarrier.type = "sawtooth";
-        gainNodeSeaGullCarrier = audioCtx.createGain()
-        oscillatorSeaGullCarrier.connect(gainNodeSeaGullCarrier)
-        gainNodeSeaGullCarrier.gain.value = 100;
-        gainNodeSeaGullCarrier.connect(audioCtx.destination);
+            if ('webkitAudioContext' in window) {
+              gainNode = audioCtx.createGainNode()
+              gainNodeR = audioCtx.createGainNode()
+            } else {
+              gainNode = audioCtx.createGain()
+              gainNodeR = audioCtx.createGain()
+            }
 
-        oscillatorSeaGullModulator = audioCtx.createOscillator()
-        oscillatorSeaGullModulator.frequency.value = 20;
-                oscillatorSeaGullModulator.type = "square";
-        gainNodeSeaGullModulator = audioCtx.createGain()
-        oscillatorSeaGullModulator.connect(gainNodeSeaGullModulator)
-        gainNodeSeaGullModulator.gain.value = 100;
-        gainNodeSeaGullModulator.connect(oscillatorSeaGullCarrier.frequency);
-        oscillatorSeaGullCarrier.start(0)
-                t = audioCtx.currentTime
-        oscillatorSeaGullCarrier.frequency.value = linearRampToValueAtTime(200, t + 2);//1200;
+            if ('webkitAudioContext' in window) {
+              oscillator.noteOn(0)
+              oscillatorR.noteOn(0)
+            } else {
+              t = audioCtx.currentTime
+              oscillator.start(t)
+              oscillatorR.start(t + 0.00002632)
+              oscillator.connect(gainNode)
+              oscillatorR.connect(gainNodeR)
+              merger = audioCtx.createChannelMerger(2)
+              gainNode.connect(merger, 0, 0)
+              gainNodeR.connect(merger, 0, 1)
+              merger.connect(audioCtx.destination)
+              t = audioCtx.currentTime
+            }
 
-        //oscillatorSeaGullModulator.start(0)
-        //squawk = () => {
-          setTimeout(() => {
-      oscillatorSeaGullCarrier.stop(0)
-          }, 1000)
-        //}
-      //  squawk();
-      }
+            var bufferSize = 2 * audioCtx.sampleRate,
+              noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
+              output = noiseBuffer.getChannelData(0);
+            for (var i = 0; i < bufferSize; i++) {
+              output[i] = Math.random() * 2 - 1;
+            }
+
+            var whiteNoise = audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+            whiteNoise.start(0);
+
+            gainNode1 = audioCtx.createGain()
+            gainNode2 = audioCtx.createGain()
+            gainNode3 = audioCtx.createGain()
+
+            whiteNoise.connect(gainNode1)
+            whiteNoise.connect(gainNode2) //steamEngine
+            whiteNoise.connect(gainNode3)
+
+            rain = () => {
+              gainNode1.gain.setValueAtTime(0, t);
+              gainNode1.connect(audioCtx.destination);
+              iGainArray = 0;
+              rampRain = 0.1;
+              timerGain = () => {
+                //console.log("timerGain")
+                setTimeout(() => {
+                  gainNode1.gain.setValueAtTime(arrayRandom[iGainArray] * rampRain, t);
+                  iGainArray++;
+                  if (iGainArray == 99) {
+                    iGainArray = 0;
+                    rampRain += 0.02;
+                  }
+                  timerGain();
+                }, 10);
+              }
+              timerGain();
+            }
+
+            waves = () => {
+              gainNode3.gain.setValueAtTime(0, t);
+              gainNode3.connect(audioCtx.destination);
+              rampWave = 0.1;
+              var timeBackwash = 3000 * Math.random() + 3000
+
+              waveStart = () => {
+                //console.log("timerGain")
+                setTimeout(() => {
+                  t = audioCtx.currentTime
+                  gainNode3.gain.linearRampToValueAtTime(1.0, t + 0.5);
+
+                  waveStop();
+                }, 500);
+              }
+
+              waveStop = () => {
+                //console.log("timerGain")
+                setTimeout(() => {
+                  t = audioCtx.currentTime
+                  var timeBackwash = 3000 * Math.random() + 3000
+                  gainNode3.gain.linearRampToValueAtTime(0.1, t + 2);
+
+                  waveStart();
+                }, timeBackwash);
+              }
+
+
+              waveStart();
+            }
+
+            steamEngine = () => {
+              gainNode2.connect(audioCtx.destination);
+              iGainArray = 0;
+              timerGain2 = () => {
+                console.log("timerGain")
+                setTimeout(() => {
+                  t = audioCtx.currentTime;
+                  gainNode2.gain.setValueAtTime(1, t);
+                  gainNode2.gain.setValueAtTime(0, t + 0.1); // 100 ms chuff
+                  timerGain2();
+                }, speed);
+              }
+              timerGain2();
+            }
+
+            seagull = () => {
+              console.log("seagull")
+              oscillatorSeaGullCarrier = audioCtx.createOscillator()
+              oscillatorSeaGullCarrier.frequency.value = 1200;
+                oscillatorSeaGullCarrier.type = "sawtooth";
+              gainNodeSeaGullCarrier = audioCtx.createGain()
+              oscillatorSeaGullCarrier.connect(gainNodeSeaGullCarrier)
+              gainNodeSeaGullCarrier.gain.value = 100;
+              gainNodeSeaGullCarrier.connect(audioCtx.destination);
+
+              oscillatorSeaGullModulator = audioCtx.createOscillator()
+              oscillatorSeaGullModulator.frequency.value = 20;
+                      oscillatorSeaGullModulator.type = "square";
+              gainNodeSeaGullModulator = audioCtx.createGain()
+              oscillatorSeaGullModulator.connect(gainNodeSeaGullModulator)
+              gainNodeSeaGullModulator.gain.value = 100;
+              gainNodeSeaGullModulator.connect(oscillatorSeaGullCarrier.frequency);
+              oscillatorSeaGullCarrier.start(0)
+                      t = audioCtx.currentTime
+              //oscillatorSeaGullCarrier.frequency.value = linearRampToValueAtTime(200, t + 2);//1200;
+
+              //oscillatorSeaGullModulator.start(0)
+              //squawk = () => {
+                setTimeout(() => {
+            oscillatorSeaGullCarrier.stop(0)
+                }, 1000)
+              //}
+            //  squawk();
+            }
 
 
 
-      play = () => {
-        if (playing == true) {
-          playing = false;
-          t = 0;
-          gainNode.gain.setValueAtTime(0, t) //turn gain down
-          gainNodeR.gain.setValueAtTime(0, t)
-          gainNode1.gain.setValueAtTime(0, t)
-          console.log("playing")
-        } else {
-          playing = true;
-          console.log("NOT playing")
-          t = 0;
-          gainNode1.gain.setValueAtTime(1, t)
+            play = () => {
+              if (playing == true) {
+                playing = false;
+                t = 0;
+                gainNode.gain.setValueAtTime(0, t) //turn gain down
+                gainNodeR.gain.setValueAtTime(0, t)
+                gainNode1.gain.setValueAtTime(0, t)
+                console.log("playing")
+              } else {
+                playing = true;
+                console.log("NOT playing")
+                t = 0;
+                gainNode1.gain.setValueAtTime(1, t)
 
-          gainNode.gain.setValueAtTime(1.0, t)
-          gainNodeR.gain.setValueAtTime(1.0, t)
-        }
+                gainNode.gain.setValueAtTime(1.0, t)
+                gainNodeR.gain.setValueAtTime(1.0, t)
+              }
 
-        //console.log("PLAY");
+              //console.log("PLAY");
 
-        t = audioCtx.currentTime
-      }
+              t = audioCtx.currentTime
+            }
 
-      // play();
-
+            // play();
+      */
     }
 
     if (document.readyState == 'loading') {
