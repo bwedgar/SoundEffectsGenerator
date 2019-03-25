@@ -43,41 +43,71 @@
       }
 
       seagull = [];
-      seagull.push(new Note(570, 1200, 200));
+      seagull.push(new Note(1570, 2200, 50));
       // seagull.push(new Note(0, 0, 600));
-      seagull.push(new Note(1200, 200, 400));
-      seagull.push(new Note(0, 0, 600));
-      seagull.push(new Note(1200, 400, 200));
+      seagull.push(new Note(2200, 1200, 50));
+       seagull.push(new Note(0, 0, 500));
+       seagull.push(new Note(1570, 2200, 50));
+       // seagull.push(new Note(0, 0, 600));
+       seagull.push(new Note(2200, 1200, 50));
+        seagull.push(new Note(0, 0, 500));
+        seagull.push(new Note(1570, 2200, 50));
+        // seagull.push(new Note(0, 0, 600));
+        seagull.push(new Note(2200, 1200, 50));
+         seagull.push(new Note(0, 0, 500));
+         seagull.push(new Note(1570, 2200, 50));
+         // seagull.push(new Note(0, 0, 600));
+         seagull.push(new Note(2200, 1200, 50));
+          seagull.push(new Note(0, 0, 500));
+          seagull.push(new Note(1570, 2200, 50));
+          // seagull.push(new Note(0, 0, 600));
+          seagull.push(new Note(2200, 1200, 50));
+           seagull.push(new Note(0, 0, 500));
+      // seagull.push(new Note(2200, 1400, 200));
+      //warble
+      // upperWarble = 1540;
+      // lowerWarble = 1300;
+      // quarterWarble = 150;
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
+      // seagull.push(new Note(upperWarble, lowerWarble, quarterWarble));
+      // seagull.push(new Note(lowerWarble, upperWarble, quarterWarble));
 
       playArray = (soundArray) => {
-        // AudioContext = AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContext || window.webkitAudioContext;
 
+        audioCtx = new AudioContext || window.webkitAudioContext;
 
         oscillator = audioCtx.createOscillator()
 
         gainNode = audioCtx.createGain()
         oscillator.connect(gainNode)
-
         gainNode.connect(audioCtx.destination)
-
         oscillator.start(0)
-        oscillator.type="triangle"
+        oscillator.type = "square"
         elapsedTime = 0 + audioCtx.currentTime;
 
         for (note of soundArray) {
-          console.log(note.duration);
-
           oscillator.frequency.setValueAtTime(note.frequencyStart, elapsedTime)
           gainNode.gain.setValueAtTime(1, elapsedTime);
           gainNode.gain.setValueAtTime(0, elapsedTime + note.duration / 1000);
-
           oscillator.frequency.linearRampToValueAtTime(note.frequencyEnd, elapsedTime + note.duration / 1000);
           elapsedTime += note.duration / 1000;
         }
       }
 
       playArray(seagull);
+
+
       /*
             var arrayRandom = []
             for (i = 0; i < 100; i++) {
