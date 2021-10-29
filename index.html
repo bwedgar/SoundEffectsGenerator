@@ -350,7 +350,7 @@
       ready();
     }
     
-    document.querySelector('radio').addEventListener('click', function() {
+    document.body.addEventListener('click', function() {
   //var context = new AudioContext();
       alert("setting up audio context");
       audioCtx = new AudioContext || window.webkitAudioContext;
