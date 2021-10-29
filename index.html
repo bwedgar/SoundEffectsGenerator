@@ -350,7 +350,7 @@
       ready();
     }
     
-    document.body.addEventListener('click', function() {
+    document.setElementById("buttonWaveformSine").addEventListener('click', function() {
   //var context = new AudioContext();
       alert("setting up audio context");
       audioCtx = new AudioContext || window.webkitAudioContext;
@@ -363,7 +363,8 @@
 </head>
 
 <body>
-
+version 3<br>
+  
   <input type="radio" name="waveforms" id="buttonWaveformSine" value="sine"> sine
   <input type="radio" name="waveforms" id="buttonWaveformSquare" value="square"> sawtooth
   <input type="radio" name="waveforms" id="buttonWaveformSawtooth" value="sawtooth"> square
