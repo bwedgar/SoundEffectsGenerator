@@ -32,6 +32,8 @@
   </style>
 
   <script>
+    
+    audioCtx=0;
     function ready() {
 
       class Note {
@@ -347,6 +349,14 @@
     } else {
       ready();
     }
+    
+    document.querySelector('button').addEventListener('click', function() {
+  //var context = new AudioContext();
+      audioCtx = new AudioContext || window.webkitAudioContext;
+  // Setup all nodes
+  // ...
+});
+    
   </script>
 
 </head>
